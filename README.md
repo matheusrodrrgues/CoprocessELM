@@ -34,7 +34,8 @@ O trabalho foi desenvolvido em grupo por:
 - **Adna Amorim**
 - **Allen Júnior**
 
-A proposta foi construir, em hardware descrito em Verilog, uma rede neural MLP capaz de classificar dígitos manuscritos diretamente na FPGA, sem auxílio de processador. O sistema recebe uma imagem 28×28 pixels do dataset MNIST, processa as duas camadas da rede e retorna o dígito previsto nos displays e LEDs da placa **DE1-SoC**.
+A proposta foi construir, em hardware descrito em Verilog, uma rede neural MLP capaz de classificar dígitos manuscritos diretamente na FPGA, sem auxílio de processador. O sistema recebe uma imagem 28×28 pixels do dataset MNIST, processa as duas camadas da rede e retorna o dígito previsto nos displays e LEDs da placa **DE1-SoC** Durante o desenvolvimento, foram utilizados assistentes de IA (ChatGPT e Claude) 
+como apoio na escrita do código, depuração e documentação do projeto..
 
 ---
 
