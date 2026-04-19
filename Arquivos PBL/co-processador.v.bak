@@ -1,0 +1,57 @@
+module co-processador (
+    input  wire        CLOCK_50,
+    input  wire [3:0]  KEY,
+    input  wire [9:0]  SW,
+    output wire [9:0]  LEDR,
+    output wire [6:0]  HEX0, // mostra valor
+    output wire [6:0]  HEX1, // mostra status
+    output wire [6:0]  HEX2, // mostra status
+    output wire [6:0]  HEX3 // mostra status
+);
+
+    // Barramento formado a partir das chaves da placa
+    wire [31:0] barramento_chaves;
+
+    // Saída principal do acelerador
+    wire [31:0] resultado_acelerador;
+
+    // Sinais da interface Avalon que ficam sem uso neste top
+    wire [31:0] leitura_avalon_unused;
+    wire        espera_avalon_unused;
+
+    // SW[8:0] ocupam os bits menos significativos do barramento
+    assign barramento_chaves = {23'd0, SW[8:0]};
+
+    // Instância do acelerador principal
+    elm_accel #(
+        .CLK_HZ(50000000),
+        .STATUS_ON_SECONDS(10),
+        .IMG_BIN_TH(1536)
+    ) u_elm_accel (
+        .clk(CLOCK_50),
+        .reset_n(KEY[0]),
+
+        .sw(barramento_chaves),
+        .confirm_btn(~KEY[1]),
+        .prep_btn(~KEY[3]),
+        .result_out(resultado_acelerador),
+
+        .avs_address(4'd0),
+        .avs_write(1'b0),
+        .avs_writedata(32'd0),
+        .avs_read(1'b0),
+        .avs_readdata(leitura_avalon_unused),
+        .avs_waitrequest(espera_avalon_unused),
+
+        .hex3(HEX3),
+        .hex2(HEX2),
+        .hex1(HEX1),
+        .hex0(HEX0),
+        .ledr_pred(LEDR[3:0]),
+        .ledr_flags(LEDR[6:4])
+    );
+
+    // LEDs que não estão sendo usados ficam apagados
+    assign LEDR[9:7] = 3'b000;
+
+endmodule

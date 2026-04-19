@@ -1,0 +1,149 @@
+module elm_accel (
+    input wire clk,
+    input wire reset_n,
+
+    // Avalon MM Slave
+    input wire [3:0]  avs_address,
+    input wire        avs_write,
+    input wire [31:0] avs_writedata,
+    input wire        avs_read,
+    output reg [31:0] avs_readdata,
+    output wire       avs_waitrequest,
+
+    // Entradas e Saídas da placa
+    input wire [2:0] sw,
+    input wire confirm_btn,
+    output wire [6:0] hex3,
+    output wire [6:0] hex2,
+    output wire [6:0] hex1,
+    output wire [6:0] hex0,
+    output wire [3:0] ledr_pred,
+    output wire [2:0] ledr_flags
+);
+
+    assign avs_waitrequest = 1'b0;
+
+    wire clr_mac;
+    wire en_mac;
+    wire mac_src_sel;
+    wire h_we;
+    wire clr_inf;
+    wire en_inf;
+
+    wire [9:0]  img_addr;
+    wire [16:0] w_addr;
+    wire [6:0]  b_addr;
+    wire [6:0]  h_addr;
+    wire [10:0] beta_addr;
+    wire [3:0]  current_class;
+
+    wire signed [15:0] img_q;
+    wire signed [15:0] w_q;
+    wire signed [15:0] b_q;
+    wire signed [15:0] beta_q;
+    wire signed [15:0] h_q;
+    wire signed [15:0] h_in;
+
+    wire signed [31:0] acc_out;
+
+    wire [1:0] current_state_out;
+    wire [31:0] cycles_reg;
+
+    wire signed [15:0] mac_in_a;
+    wire signed [15:0] mac_in_b;
+
+    assign mac_in_a = (mac_src_sel == 1'b1) ? h_q    : img_q;
+    assign mac_in_b = (mac_src_sel == 1'b1) ? beta_q : w_q;
+
+    Control_unit u_control (
+        .clk(clk),
+        .reset_n(reset_n),
+        .sw(sw),
+        .confirm_btn(confirm_btn),
+
+        .clr_mac(clr_mac),
+        .en_mac(en_mac),
+        .mac_src_sel(mac_src_sel),
+        .h_we(h_we),
+        .clr_inf(clr_inf),
+        .en_inf(en_inf),
+
+        .img_addr(img_addr),
+        .w_addr(w_addr),
+        .b_addr(b_addr),
+        .beta_addr(beta_addr),
+        .h_addr(h_addr),
+        .current_class(current_class),
+
+        .ledr_flags(ledr_flags),
+        .hex3(hex3),
+        .hex2(hex2),
+        .hex1(hex1),
+        .hex0(hex0),
+
+        .current_state_out(current_state_out),
+        .cycles_reg(cycles_reg)
+    );
+
+    Mem_block u_mem (
+        .clk(clk),
+
+        .img_addr(img_addr),
+        .img_q(img_q),
+
+        .w_addr(w_addr),
+        .w_q(w_q),
+
+        .b_addr(b_addr),
+        .b_q(b_q),
+
+        .beta_addr(beta_addr),
+        .beta_q(beta_q),
+
+        .h_addr(h_addr),
+        .h_we(h_we),
+        .h_data_in(h_in),
+        .h_q(h_q)
+    );
+
+    Mac u_mac (
+        .clk(clk),
+        .reset_n(reset_n),
+        .clr(clr_mac),
+        .en(en_mac),
+        .in_a(mac_in_a),
+        .in_b(mac_in_b),
+        .acc_out(acc_out)
+    );
+
+    Activation u_activation (
+        .z_in(acc_out),
+        .b_in(b_q),
+        .h_out(h_in)
+    );
+
+    Inferencia u_inferencia (
+        .clk(clk),
+        .reset_n(reset_n),
+        .clr(clr_inf),
+        .en(en_inf),
+        .class_val(acc_out),
+        .class_idx(current_class),
+        .pred_out(ledr_pred)
+    );
+
+    always @(*) begin
+        if (avs_read) begin
+            case (avs_address)
+                4'h3: avs_readdata = {30'b0, current_state_out};
+                4'h4: avs_readdata = {28'b0, ledr_pred};
+                4'h5: avs_readdata = cycles_reg;
+                default: avs_readdata = 32'h00000000;
+            endcase
+        end else begin
+            avs_readdata = 32'h00000000;
+        end
+    end
+
+endmodule
+

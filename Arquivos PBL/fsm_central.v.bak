@@ -1,0 +1,103 @@
+module fsm_central (
+    input  wire        visible,
+    input  wire [31:0] status_word,
+    input  wire [3:0]  pred,   // 🔥 NOVO: número previsto
+    output reg  [6:0]  hex3,
+    output reg  [6:0]  hex2,
+    output reg  [6:0]  hex1,
+    output reg  [6:0]  hex0
+);
+
+    // ============================
+    // 7 SEGMENTOS
+    // ============================
+
+    localparam [6:0] SEG_BLANK = 7'b1111111;
+
+    // Letras
+    localparam [6:0] SEG_B = 7'b0000011;
+    localparam [6:0] SEG_U = 7'b1000001;
+    localparam [6:0] SEG_S = 7'b0010010;
+    localparam [6:0] SEG_Y = 7'b0010001;
+
+    localparam [6:0] SEG_D = 7'b0100001;
+    localparam [6:0] SEG_O = 7'b1000000;
+    localparam [6:0] SEG_N = 7'b0101011;
+    localparam [6:0] SEG_E = 7'b0000110;
+
+    localparam [6:0] SEG_I = 7'b1111001;
+    localparam [6:0] SEG_L = 7'b1000111;
+    localparam [6:0] SEG_R = 7'b0101111;
+
+    // ============================
+    // DECODIFICADOR NUMÉRICO
+    // ============================
+
+    function [6:0] seg7_num;
+        input [3:0] num;
+        begin
+            case (num)
+                4'd0: seg7_num = 7'b1000000;
+                4'd1: seg7_num = 7'b1111001;
+                4'd2: seg7_num = 7'b0100100;
+                4'd3: seg7_num = 7'b0110000;
+                4'd4: seg7_num = 7'b0011001;
+                4'd5: seg7_num = 7'b0010010;
+                4'd6: seg7_num = 7'b0000010;
+                4'd7: seg7_num = 7'b1111000;
+                4'd8: seg7_num = 7'b0000000;
+                4'd9: seg7_num = 7'b0010000;
+                default: seg7_num = 7'b1111111;
+            endcase
+        end
+    endfunction
+
+    // ============================
+    // FLAGS
+    // ============================
+
+    wire busy_flag  = status_word[4];
+    wire done_flag  = status_word[5];
+    wire error_flag = status_word[6];
+
+    // ============================
+    // DISPLAY
+    // ============================
+
+    always @(*) begin
+        // padrão
+        hex3 = SEG_BLANK;
+        hex2 = SEG_BLANK;
+        hex1 = SEG_BLANK;
+        hex0 = SEG_BLANK;
+
+        if (visible) begin
+
+            // HEX0 → número
+            hex0 = seg7_num(pred);
+
+            // HEX3..HEX1 → estado
+            if (error_flag) begin
+                hex3 = SEG_E;
+                hex2 = SEG_R;
+                hex1 = SEG_R;
+            end
+            else if (busy_flag) begin
+                hex3 = SEG_B;
+                hex2 = SEG_U;
+                hex1 = SEG_S;
+            end
+            else if (done_flag) begin
+                hex3 = SEG_D;
+                hex2 = SEG_O;
+                hex1 = SEG_N;
+            end
+            else begin
+                hex3 = SEG_I;
+                hex2 = SEG_D;
+                hex1 = SEG_L;
+            end
+        end
+    end
+
+endmodule

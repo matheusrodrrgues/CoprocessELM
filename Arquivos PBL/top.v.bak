@@ -1,0 +1,47 @@
+module top (
+    input  wire        CLOCK_50,
+    input  wire [3:0]  KEY,
+    input  wire [9:0]  SW,
+    output wire [9:0]  LEDR,
+    output wire [6:0]  HEX0,
+    output wire [6:0]  HEX1,
+    output wire [6:0]  HEX2,
+    output wire [6:0]  HEX3
+);
+
+    wire [31:0] sw_bus_32;
+    wire [31:0] result_out;
+    wire [31:0] avs_readdata_unused;
+    wire        avs_waitrequest_unused;
+
+    assign sw_bus_32 = {29'd0, SW[2:0]};
+
+    elm_accel #(
+        .CLK_HZ(50000000),
+        .STATUS_ON_SECONDS(10)
+    ) u_elm_accel (
+        .clk(CLOCK_50),
+        .reset_n(KEY[0]),
+
+        .sw(sw_bus_32),
+        .confirm_btn(~KEY[1]),
+        .result_out(result_out),
+
+        .avs_address(4'd0),
+        .avs_write(1'b0),
+        .avs_writedata(32'd0),
+        .avs_read(1'b0),
+        .avs_readdata(avs_readdata_unused),
+        .avs_waitrequest(avs_waitrequest_unused),
+
+        .hex3(HEX3),
+        .hex2(HEX2),
+        .hex1(HEX1),
+        .hex0(HEX0),
+        .ledr_pred(LEDR[3:0]),
+        .ledr_flags(LEDR[6:4])
+    );
+
+    assign LEDR[9:7] = 3'b000;
+
+endmodule

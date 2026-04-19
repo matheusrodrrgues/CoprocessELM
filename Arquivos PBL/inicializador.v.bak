@@ -1,0 +1,187 @@
+// =============================================================================
+// Módulo: inicializador
+// Descrição: FSM de inicialização automática do acelerador MLP.
+//            Ao sair do reset, envia via interface Avalon-MM a sequência
+//            completa de instruções necessárias para preparar o acelerador
+//            e disparar a inferência, sem nenhuma interação manual.
+//
+// Sequência executada automaticamente:
+//   1. CMD_STORE_IMG — sinaliza que a imagem está carregada na mem_imagem
+//   2. CMD_STORE_W   — sinaliza que os pesos estão carregados na mem_pesos
+//   3. CMD_STORE_B   — sinaliza que os bias estão carregados na mem_bias
+//   4. CMD_START     — dispara a inferência
+//   5. Aguarda ST_DONE (bit[5] do status) e para
+//
+// Requisito: pesos, bias, beta e imagem já inicializados via .mif em síntese.
+//
+// Conexão com o elm_accel:
+//   Este módulo deve ser instanciado junto ao coprocessador e conectado
+//   à interface Avalon do elm_accel (avs_address, avs_write, avs_writedata).
+//
+// Endereços Avalon usados (conforme elm_accel.v):
+//   avs_address = 0x0 + avs_writedata[25:16]=0 → CMD_STORE_IMG via Avalon
+//   avs_address = 0x1 + avs_writedata[28:12]=0 → CMD_STORE_W   via Avalon
+//   avs_address = 0x2 + avs_writedata[22:16]=0 → CMD_STORE_B   via Avalon
+//   avs_address = 0x3 (leitura)                → lê palavra de status
+//
+// Nota: CMD_START é enviado via avs_write no endereço reservado 0xF,
+//       que o elm_accel interpreta internamente como disparo de inferência
+//       quando imagem_ok, pesos_ok e bias_ok estão todos ativos.
+// =============================================================================
+
+module inicializador (
+    input  wire        clk,
+    input  wire        reset_n,
+
+    // Interface Avalon-MM → conectar ao elm_accel
+    output reg  [3:0]  avs_address,
+    output reg         avs_write,
+    output reg  [31:0] avs_writedata,
+    output reg         avs_read,
+    input  wire [31:0] avs_readdata,
+    input  wire        avs_waitrequest,
+
+    // Indica que a inicialização terminou e a inferência foi disparada
+    output reg         pronto,
+    // Indica que ST_DONE foi detectado (inferência concluída)
+    output reg         inferencia_ok
+);
+
+    // -------------------------------------------------------------------------
+    // Estados da FSM
+    // -------------------------------------------------------------------------
+    localparam [3:0] ST_RESET        = 4'd0;  // aguarda estabilização
+    localparam [3:0] ST_STORE_IMG    = 4'd1;  // envia CMD_STORE_IMG
+    localparam [3:0] ST_WAIT_IMG     = 4'd2;  // aguarda 1 ciclo
+    localparam [3:0] ST_STORE_W      = 4'd3;  // envia CMD_STORE_W
+    localparam [3:0] ST_WAIT_W       = 4'd4;  // aguarda 1 ciclo
+    localparam [3:0] ST_STORE_B      = 4'd5;  // envia CMD_STORE_B
+    localparam [3:0] ST_WAIT_B       = 4'd6;  // aguarda 1 ciclo
+    localparam [3:0] ST_START        = 4'd7;  // envia CMD_START
+    localparam [3:0] ST_WAIT_DONE    = 4'd8;  // aguarda ST_DONE
+    localparam [3:0] ST_DONE         = 4'd9;  // inferência concluída
+
+    reg [3:0] estado;
+
+    // Contador de estabilização após reset (aguarda 10 ciclos)
+    localparam ESPERA_RESET = 10;
+    reg [4:0] contador_reset;
+
+    // -------------------------------------------------------------------------
+    // FSM principal
+    // -------------------------------------------------------------------------
+    always @(posedge clk or negedge reset_n) begin
+        if (!reset_n) begin
+            estado          <= ST_RESET;
+            contador_reset  <= 5'd0;
+            avs_address     <= 4'd0;
+            avs_write       <= 1'b0;
+            avs_writedata   <= 32'd0;
+            avs_read        <= 1'b0;
+            pronto          <= 1'b0;
+            inferencia_ok   <= 1'b0;
+        end else begin
+            // Padrão: desativa escrita/leitura
+            avs_write <= 1'b0;
+            avs_read  <= 1'b0;
+
+            case (estado)
+
+                // -------------------------------------------------------------
+                // Aguarda estabilização do sistema após reset
+                // -------------------------------------------------------------
+                ST_RESET: begin
+                    if (contador_reset < ESPERA_RESET) begin
+                        contador_reset <= contador_reset + 5'd1;
+                    end else begin
+                        estado <= ST_STORE_IMG;
+                    end
+                end
+
+                // -------------------------------------------------------------
+                // Envia CMD_STORE_IMG (endereço Avalon 0x0)
+                // Sinaliza ao acelerador que a mem_imagem está pronta
+                // -------------------------------------------------------------
+                ST_STORE_IMG: begin
+                    avs_address   <= 4'h0;
+                    avs_writedata <= 32'd0; // endereço 0, valor 0 (só sinaliza)
+                    avs_write     <= 1'b1;
+                    estado        <= ST_WAIT_IMG;
+                end
+
+                ST_WAIT_IMG: begin
+                    if (!avs_waitrequest)
+                        estado <= ST_STORE_W;
+                end
+
+                // -------------------------------------------------------------
+                // Envia CMD_STORE_W (endereço Avalon 0x1)
+                // Sinaliza ao acelerador que a mem_pesos está pronta
+                // -------------------------------------------------------------
+                ST_STORE_W: begin
+                    avs_address   <= 4'h1;
+                    avs_writedata <= 32'd0;
+                    avs_write     <= 1'b1;
+                    estado        <= ST_WAIT_W;
+                end
+
+                ST_WAIT_W: begin
+                    if (!avs_waitrequest)
+                        estado <= ST_STORE_B;
+                end
+
+                // -------------------------------------------------------------
+                // Envia CMD_STORE_B (endereço Avalon 0x2)
+                // Sinaliza ao acelerador que a mem_bias está pronta
+                // -------------------------------------------------------------
+                ST_STORE_B: begin
+                    avs_address   <= 4'h2;
+                    avs_writedata <= 32'd0;
+                    avs_write     <= 1'b1;
+                    estado        <= ST_WAIT_B;
+                end
+
+                ST_WAIT_B: begin
+                    if (!avs_waitrequest)
+                        estado <= ST_START;
+                end
+
+                // -------------------------------------------------------------
+                // Envia CMD_START (endereço Avalon 0xF)
+                // Dispara a inferência — flags imagem_ok/pesos_ok/bias_ok
+                // já foram setados pelos STOREs anteriores
+                // -------------------------------------------------------------
+                ST_START: begin
+                    avs_address   <= 4'hF;
+                    avs_writedata <= 32'd4; // opcode CMD_START = 3'd4
+                    avs_write     <= 1'b1;
+                    pronto        <= 1'b1;
+                    estado        <= ST_WAIT_DONE;
+                end
+
+                // -------------------------------------------------------------
+                // Aguarda ST_DONE: lê o registrador de status (0x3)
+                // bit[5] = finalizado
+                // -------------------------------------------------------------
+                ST_WAIT_DONE: begin
+                    avs_address <= 4'h3;
+                    avs_read    <= 1'b1;
+                    if (avs_readdata[5] == 1'b1)
+                        estado <= ST_DONE;
+                end
+
+                // -------------------------------------------------------------
+                // Inferência concluída
+                // -------------------------------------------------------------
+                ST_DONE: begin
+                    inferencia_ok <= 1'b1;
+                    avs_read      <= 1'b0;
+                end
+
+                default: estado <= ST_RESET;
+
+            endcase
+        end
+    end
+
+endmodule

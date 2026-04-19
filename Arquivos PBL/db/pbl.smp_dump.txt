@@ -1,0 +1,39 @@
+
+State Machine - |coprocessador|elm_accel:u_elm_accel|comando_atual
+Name comando_atual.CMD_STORE_B comando_atual.CMD_STORE_W comando_atual.CMD_STORE_IMG comando_atual.CMD_CLEAR_ERR comando_atual.CMD_START 
+comando_atual.CMD_CLEAR_ERR 0 0 0 0 0 
+comando_atual.CMD_STORE_IMG 0 0 1 1 0 
+comando_atual.CMD_STORE_W 0 1 0 1 0 
+comando_atual.CMD_STORE_B 1 0 0 1 0 
+comando_atual.CMD_START 0 0 0 1 1 
+
+State Machine - |coprocessador|elm_accel:u_elm_accel|fase_atual
+Name fase_atual.PH_ARGMAX fase_atual.PH_ARGMAX_WAIT fase_atual.PH_O_MAC fase_atual.PH_O_WAIT1 fase_atual.PH_O_WAIT0 fase_atual.PH_O_ADDR fase_atual.PH_H_SAVE fase_atual.PH_H_ACT fase_atual.PH_H_BIAS_W1 fase_atual.PH_H_BIAS_W0 fase_atual.PH_H_BIAS fase_atual.PH_H_MAC fase_atual.PH_H_WAIT1 fase_atual.PH_H_WAIT0 fase_atual.PH_H_ADDR 
+fase_atual.PH_H_ADDR 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+fase_atual.PH_H_WAIT0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 
+fase_atual.PH_H_WAIT1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 
+fase_atual.PH_H_MAC 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 
+fase_atual.PH_H_BIAS 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 
+fase_atual.PH_H_BIAS_W0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 
+fase_atual.PH_H_BIAS_W1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 
+fase_atual.PH_H_ACT 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 
+fase_atual.PH_H_SAVE 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 
+fase_atual.PH_O_ADDR 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 
+fase_atual.PH_O_WAIT0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 
+fase_atual.PH_O_WAIT1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 
+fase_atual.PH_O_MAC 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 
+fase_atual.PH_ARGMAX_WAIT 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 
+fase_atual.PH_ARGMAX 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |coprocessador|inicializador:u_init|estado
+Name estado.ST_DONE estado.ST_WAIT_DONE estado.ST_START estado.ST_WAIT_B estado.ST_STORE_B estado.ST_WAIT_W estado.ST_STORE_W estado.ST_WAIT_IMG estado.ST_STORE_IMG estado.ST_RESET 
+estado.ST_RESET 0 0 0 0 0 0 0 0 0 0 
+estado.ST_STORE_IMG 0 0 0 0 0 0 0 0 1 1 
+estado.ST_WAIT_IMG 0 0 0 0 0 0 0 1 0 1 
+estado.ST_STORE_W 0 0 0 0 0 0 1 0 0 1 
+estado.ST_WAIT_W 0 0 0 0 0 1 0 0 0 1 
+estado.ST_STORE_B 0 0 0 0 1 0 0 0 0 1 
+estado.ST_WAIT_B 0 0 0 1 0 0 0 0 0 1 
+estado.ST_START 0 0 1 0 0 0 0 0 0 1 
+estado.ST_WAIT_DONE 0 1 0 0 0 0 0 0 0 1 
+estado.ST_DONE 1 0 0 0 0 0 0 0 0 1 

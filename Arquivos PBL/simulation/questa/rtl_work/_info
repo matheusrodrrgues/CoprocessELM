@@ -1,0 +1,323 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 d/home/aluno/Documentos/PBLFinal/simulation/questa
+vargmax
+Z1 !s110 1776455309
+!i10b 1
+!s100 j>oQ0OVOkZfOd2[P8D[9J0
+Z2 !s11b Dg1SIo80bB@j0V0VzS_@n1
+IZ0af@_:OQ;^`]gV@alfVB0
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+R0
+w1776382255
+8/home/aluno/Documentos/PBLFinal/argmax.v
+F/home/aluno/Documentos/PBLFinal/argmax.v
+!i122 5
+L0 42 70
+Z4 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z5 !s108 1776455308.000000
+!s107 /home/aluno/Documentos/PBLFinal/argmax.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/argmax.v|
+!i113 1
+Z6 o-vlog01compat -work work
+Z7 !s92 -vlog01compat -work work +incdir+/home/aluno/Documentos/PBLFinal
+Z8 tCvgOpt 0
+vativacao
+Z9 !s110 1776455308
+!i10b 1
+!s100 C?`iCKHEXBKhSU7P5RSZA1
+R2
+IU5a>8_2@Fl6=WQLD54e[>3
+R3
+R0
+w1776453546
+8/home/aluno/Documentos/PBLFinal/ativacao.v
+F/home/aluno/Documentos/PBLFinal/ativacao.v
+!i122 1
+L0 58 98
+R4
+r1
+!s85 0
+31
+R5
+!s107 /home/aluno/Documentos/PBLFinal/ativacao.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/ativacao.v|
+!i113 1
+R6
+R7
+R8
+vbancodememorias
+R9
+!i10b 1
+!s100 Ri1ET<b7ikVQlSz1KnD<a3
+R2
+I?m116Aod;V5c_;AF?0E7T0
+R3
+R0
+w1776381982
+8/home/aluno/Documentos/PBLFinal/bancodememorias.v
+F/home/aluno/Documentos/PBLFinal/bancodememorias.v
+!i122 3
+L0 72 90
+R4
+r1
+!s85 0
+31
+R5
+!s107 /home/aluno/Documentos/PBLFinal/bancodememorias.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/bancodememorias.v|
+!i113 1
+R6
+R7
+R8
+vcoprocessador
+R9
+!i10b 1
+!s100 cbnhWBLl__;6naHZZI4Wi3
+R2
+Ig<bMjU[m1E>?NN84CEK_E2
+R3
+R0
+w1776446479
+8/home/aluno/Documentos/PBLFinal/coprocessador.v
+F/home/aluno/Documentos/PBLFinal/coprocessador.v
+!i122 0
+L0 1 83
+R4
+r1
+!s85 0
+31
+R5
+!s107 /home/aluno/Documentos/PBLFinal/coprocessador.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/coprocessador.v|
+!i113 1
+R6
+R7
+R8
+velm_accel
+R9
+!i10b 1
+!s100 D5]HEoLNiU4@NP2<?JH<f2
+R2
+I9dUA]PzeRNThc1gFGM]V]3
+R3
+R0
+w1776289858
+8/home/aluno/Documentos/PBLFinal/elm_accel.v
+F/home/aluno/Documentos/PBLFinal/elm_accel.v
+!i122 4
+L0 1 745
+R4
+r1
+!s85 0
+31
+R5
+!s107 /home/aluno/Documentos/PBLFinal/elm_accel.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/elm_accel.v|
+!i113 1
+R6
+R7
+R8
+vfsm_central
+R9
+!i10b 1
+!s100 jDYhHo@:RSYB6=APJIM_<0
+R2
+IdR=lkANb:Q?M8^X4Lc@l92
+R3
+R0
+w1776382126
+8/home/aluno/Documentos/PBLFinal/fsm_central.v
+F/home/aluno/Documentos/PBLFinal/fsm_central.v
+!i122 2
+L0 58 106
+R4
+r1
+!s85 0
+31
+R5
+!s107 /home/aluno/Documentos/PBLFinal/fsm_central.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/fsm_central.v|
+!i113 1
+R6
+R7
+R8
+vinicializador
+R1
+!i10b 1
+!s100 _J06::mTjRDCT9N[BkIfW0
+R2
+IU1zP1oaDEP4ndHBTj5?4Y2
+R3
+R0
+w1776447605
+8/home/aluno/Documentos/PBLFinal/inicializador.v
+F/home/aluno/Documentos/PBLFinal/inicializador.v
+!i122 11
+L0 1 148
+R4
+r1
+!s85 0
+31
+Z10 !s108 1776455309.000000
+!s107 /home/aluno/Documentos/PBLFinal/inicializador.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/inicializador.v|
+!i113 1
+R6
+R7
+R8
+vmac_calculo
+R1
+!i10b 1
+!s100 ]XlFjYHJ>57PH5mhIT0bQ2
+R2
+ITR=:ccMKlSO0X:HL6nb_Z0
+R3
+R0
+w1776381585
+8/home/aluno/Documentos/PBLFinal/mac_calculo.v
+F/home/aluno/Documentos/PBLFinal/mac_calculo.v
+!i122 10
+L0 44 21
+R4
+r1
+!s85 0
+31
+R10
+!s107 /home/aluno/Documentos/PBLFinal/mac_calculo.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/mac_calculo.v|
+!i113 1
+R6
+R7
+R8
+vmem_bias
+R1
+!i10b 1
+!s100 ^TmU8R@V9IjlDk]lfiZN^1
+R2
+IFRZG95iI?m]gI<GiN3=8H3
+R3
+R0
+w1776267620
+8/home/aluno/Documentos/PBLFinal/mem_bias.v
+F/home/aluno/Documentos/PBLFinal/mem_bias.v
+!i122 8
+Z11 L0 40 70
+R4
+r1
+!s85 0
+31
+R10
+!s107 /home/aluno/Documentos/PBLFinal/mem_bias.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/mem_bias.v|
+!i113 1
+R6
+R7
+R8
+vmem_imagem
+R1
+!i10b 1
+!s100 G1aNR>`fBXW_jm[S]B?c:0
+R2
+IiCJUFdOk2:lBP=56^Z<l03
+R3
+R0
+w1776454810
+8/home/aluno/Documentos/PBLFinal/mem_imagem.v
+F/home/aluno/Documentos/PBLFinal/mem_imagem.v
+!i122 6
+L0 40 69
+R4
+r1
+!s85 0
+31
+R10
+!s107 /home/aluno/Documentos/PBLFinal/mem_imagem.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/mem_imagem.v|
+!i113 1
+R6
+R7
+R8
+vmem_pesos
+R1
+!i10b 1
+!s100 >flHQA`KQ@PIiAXX<<`XN2
+R2
+IOCO`]3XD^9f>Ao_QGmlFB1
+R3
+R0
+w1776267562
+8/home/aluno/Documentos/PBLFinal/mem_pesos.v
+F/home/aluno/Documentos/PBLFinal/mem_pesos.v
+!i122 7
+R11
+R4
+r1
+!s85 0
+31
+R10
+!s107 /home/aluno/Documentos/PBLFinal/mem_pesos.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/mem_pesos.v|
+!i113 1
+R6
+R7
+R8
+vmem_saida
+R1
+!i10b 1
+!s100 0ZGKF8hKTk^7IoiM[lKnc2
+R2
+I4>bRNc=Xi`Y@:^;DN9Hc[0
+R3
+R0
+w1776267680
+8/home/aluno/Documentos/PBLFinal/mem_saida.v
+F/home/aluno/Documentos/PBLFinal/mem_saida.v
+!i122 9
+R11
+R4
+r1
+!s85 0
+31
+R10
+!s107 /home/aluno/Documentos/PBLFinal/mem_saida.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/mem_saida.v|
+!i113 1
+R6
+R7
+R8
+vtb_elm_accel_completo
+R1
+!i10b 1
+!s100 _Dk_;ej;O6>82g3ZCcnKC3
+R2
+IniKfeFHzkh`2R9M]VY`X`2
+R3
+R0
+w1776442232
+8/home/aluno/Documentos/PBLFinal/tb_teste.v
+F/home/aluno/Documentos/PBLFinal/tb_teste.v
+!i122 12
+L0 19 381
+R4
+r1
+!s85 0
+31
+R10
+!s107 /home/aluno/Documentos/PBLFinal/tb_teste.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/aluno/Documentos/PBLFinal|/home/aluno/Documentos/PBLFinal/tb_teste.v|
+!i113 1
+R6
+R7
+R8

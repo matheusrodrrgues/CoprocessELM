@@ -1,0 +1,20 @@
+Fitter Status : Successful - Fri Apr 17 17:38:04 2026
+Quartus Prime Version : 23.1std.0 Build 991 11/28/2023 SC Lite Edition
+Revision Name : pbl
+Top-level Entity Name : coprocessador
+Family : Cyclone V
+Device : 5CSEMA5F31C6
+Timing Models : Final
+Logic utilization (in ALMs) : 1,940 / 32,070 ( 6 % )
+Total registers : 2457
+Total pins : 53 / 457 ( 12 % )
+Total virtual pins : 0
+Total block memory bits : 1,640,704 / 4,065,280 ( 40 % )
+Total RAM Blocks : 203 / 397 ( 51 % )
+Total DSP Blocks : 4 / 87 ( 5 % )
+Total HSSI RX PCSs : 0
+Total HSSI PMA RX Deserializers : 0
+Total HSSI TX PCSs : 0
+Total HSSI PMA TX Serializers : 0
+Total PLLs : 0 / 6 ( 0 % )
+Total DLLs : 0 / 4 ( 0 % )
