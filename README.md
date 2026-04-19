@@ -3,16 +3,6 @@
 > **Marco 1 — Coprocessador ELM em FPGA + Simulação**
 > Universidade Estadual de Feira de Santana · Departamento de Tecnologia
 
-<div align="center">
-
-[![Simulation](https://img.shields.io/badge/simulação-ModelSim-blue)](#10-simulação-e-testes)
-[![Target](https://img.shields.io/badge/alvo-DE1--SoC%20(Cyclone%20V)-orange)](#7-ambiente-de-desenvolvimento)
-[![Format](https://img.shields.io/badge/ponto%20fixo-Q4.12-green)](#4-formato-numérico-q412)
-[![License](https://img.shields.io/badge/disciplina-TEC%20499-purple)](#)
-[![UEFS](https://img.shields.io/badge/UEFS-DEXA-red)](#)
-
-</div>
-
 ---
 
 ## 📋 Sumário
@@ -717,11 +707,11 @@ PBLFinal/
 
 ---
 
-## 14. Equipe
+## 14. Equipe de Desenvolvedores
 
-> _Matheus Rodrigues_
-> _Adna Amorim_
-> _Allen Júnior_
+> _Matheus Silva Rodrigues_
+> _Adna Amorim da Silva Conceição_
+> _Allen Gomes de Oliveira Junior_
 
 ---
 
@@ -730,10 +720,10 @@ PBLFinal/
 1. **DE1-SoC User Manual** — Terasic Technologies. Disponível em: [fpgacademy.org](https://fpgacademy.org/boards.html)
 2. **Accelerating Extreme Learning Machine on FPGA** — UTHM Publisher. Disponível em: [publisher.uthm.edu.my](https://publisher.uthm.edu.my/ojs/index.php/ijie/article/view/4431)
 3. **Extreme learning machine: algorithm, theory and applications** — ResearchGate. Disponível em: [researchgate.net](https://www.researchgate.net/publication/257512921)
-4. **A máquina de aprendizado extremo (ELM)** — Computação Inteligente. Disponível em: [computacaointeligente.com.br](https://computacaointeligente.com.br/algoritmos/maquina-de-aprendizado-extremo/)
-5. **Intel Quartus Prime Lite Design Software** — versão 25.1.
-6. **ModelSim Intel FPGA Starter Edition** — versão 2020.1.
-7. OLIVEIRA, J. G. M. *Uma arquitetura reconfigurável de Rede Neural Artificial utilizando FPGA*. Dissertação (Mestrado) – UNIFEI, Itajubá, 2017. Disponível em: [repositorio.unifei.edu.br](https://repositorio.unifei.edu.br/xmlui/handle/123456789/861)
+4. **Intel Quartus Prime Lite Design Software** — versão 25.1.
+5. **ChatGPT** — OpenAI. Assistente de linguagem utilizado como apoio no desenvolvimento e documentação do projeto. Disponível em: [openai.com/chatgpt](https://openai.com/chatgpt)
+6. **Claude** — Anthropic. Assistente de linguagem utilizado como apoio no desenvolvimento e documentação do projeto. Disponível em: [claude.ai](https://claude.ai)
+
 
 ---
 
