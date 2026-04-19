@@ -81,41 +81,53 @@ O sistema retorna um valor no intervalo **0..9** indicando o dígito identificad
 | b (bias oculta) | 128 × 1 | 256 B |
 | β (pesos saída) | 128 × 10 | ~2,5 KB (Q4.12) |
 
+### 1.5 Como a inferência funciona no hardware
+
+A inferência é feita de forma sequencial — um neurônio de cada vez. Para cada um dos 128 neurônios ocultos, a FSM percorre todos os 784 pixels, acumulando o produto `pixel × peso` em um registrador de 32 bits. Ao terminar, soma o bias, passa pelo módulo de ativação (sigmoid aproximada) e salva o resultado em `h_mem`. Só depois de calcular todos os 128 neurônios ocultos é que começa a camada de saída, que faz o mesmo processo para as 10 classes.
+
+O ponto crítico é a latência das BRAMs: as memórias síncronas do Quartus levam 1 ciclo para entregar o dado após o endereço ser apresentado. Por isso cada iteração do MAC tem 2 ciclos de espera embutidos na FSM (`PH_H_WAIT0` e `PH_H_WAIT1`). Sem eles, o multiplicador receberia o dado do endereço anterior e o acumulador ficaria errado do primeiro pixel em diante.
+
+No total, a inferência completa leva cerca de **101.770 ciclos**, o que a 50 MHz representa **~2 ms** — tempo mais que suficiente para a aplicação de classificação de dígitos em tempo real.
+
 ---
 
 ## 2. Requisitos
 
-### 2.1 O que o sistema implementa
+### 2.1 Funcionais
 
-Cada requisito abaixo corresponde diretamente a algo que existe no código — não são itens genéricos, são funcionalidades verificáveis:
+| ID | Requisito |
+|----|-----------|
+| RF-01 | Aceitar imagem 28×28 pixels em formato Q4.12 (WIDTH=16) |
+| RF-02 | Implementar camada oculta: `h = sigmoid(W · x + b)` com 128 neurônios |
+| RF-03 | Implementar camada de saída: `y = β · h` com 10 classes |
+| RF-04 | Retornar predição `pred = argmax(y)` no intervalo [0, 9] |
+| RF-05 | Todos os valores internos em ponto fixo Q4.12 |
+| RF-06 | Arquitetura sequencial com FSM de controle |
+| RF-07 | Datapath com unidade MAC (Multiply-Accumulate) |
+| RF-08 | Função de ativação sigmoid aproximada por interpolação linear |
+| RF-09 | Memórias para imagem, pesos W, bias b e pesos β |
+| RF-10 | ISA com instruções: STORE_IMG, STORE_W, STORE_B, START, STATUS, CLEAR_ERR |
+| RF-11 | Interface Avalon-MM para integração futura com processador |
+| RF-12 | Inicialização automática via módulo `inicializador.v` ao sair do reset |
 
-| ID | O que foi implementado | Onde no código |
-|----|------------------------|----------------|
-| RF-01 | Recebe imagem 28×28 em Q4.12 e binariza com limiar `IMG_BIN_TH = 1536` | `elm_accel.v` → `dado_img_bin` |
-| RF-02 | Calcula `h = sigmoid(W·x + b)` para 128 neurônios com acumulador 32 bits | `elm_accel.v` → fases `PH_H_*` |
-| RF-03 | Calcula `y = β·h` para 10 classes de saída | `elm_accel.v` → fases `PH_O_*` |
-| RF-04 | Retorna `pred = argmax(y[0..9])` no intervalo 0–9 | `argmax.v` → `classe_escolhida` |
-| RF-05 | Toda a aritmética interna em Q4.12 — multiplicação gera Q8.24, reescalada por shift de 12 bits | `mac_calculo.v` → `>>> Q_FRAC` |
-| RF-06 | FSM com 4 estados (IDLE/BUSY/DONE/ERROR) e 15 fases internas no BUSY | `elm_accel.v` → `estado_atual`, `fase_atual` |
-| RF-07 | Duas unidades MAC instanciadas: `u_mac_hidden` para camada oculta, `u_mac_output` para saída | `elm_accel.v` |
-| RF-08 | Sigmoid aproximada por 4 segmentos lineares entre x=−4 e x=+4, erro < 2% | `ativacao.v` |
-| RF-09 | 4 memórias separadas: imagem (784×16b), pesos (100352×16b), bias (128×16b), beta (1280×16b) | `bancodememorias.v` |
-| RF-10 | 6 instruções via switches de 3 bits: `CLEAR_ERR`, `STORE_IMG`, `STORE_W`, `STORE_B`, `START`, `STATUS` | `elm_accel.v` → `CMD_*` |
-| RF-11 | Interface Avalon-MM com 3 endereços de escrita e 3 de leitura (status, predição, ciclos) | `elm_accel.v` → `avs_*` |
-| RF-12 | Flags `imagem_ok`, `pesos_ok`, `bias_ok` bloqueiam o START enquanto alguma estiver inativa | `elm_accel.v` → `ledr_flags` |
-| RF-13 | Contador de ciclos de execução gravado em `ciclos_total` ao finalizar | `elm_accel.v` → `ciclos_execucao` |
-| RF-14 | Saturação 32→16 bits antes da ativação para evitar overflow no acumulador | `elm_accel.v` → `sat32_to_q16` |
-| RF-15 | Inicialização automática das instruções ao sair do reset, sem interação manual | `inicializador.v` |
+### 2.2 Não-funcionais
 
-### 2.2 Decisões técnicas que condicionaram o projeto
+| ID | Requisito |
+|----|-----------|
+| RNF-01 | Sintetizável para DE1-SoC (Cyclone V — 5CSEMA5F31C6) |
+| RNF-02 | Clock alvo: 50 MHz |
+| RNF-03 | Testbench com 11 cenários cobrindo todos os estados da FSM |
+| RNF-04 | Código Verilog comentado e documentado por módulo |
+| RNF-05 | Script Python para conversão de imagens PNG → MIF em Q4.12 |
 
-Essas não são restrições impostas de fora — são escolhas que tomamos e que moldaram como tudo foi feito:
+### 2.3 Restrições de projeto
 
-- **Ponto fixo Q4.12 em tudo:** sem ponto flutuante em nenhuma operação. Elimina divisores e multiplicadores de ponto flutuante do hardware, reduz área e melhora a frequência máxima. Os pesos já vêm treinados nesse formato, então a conversão é direta.
-- **Memórias inicializadas por `.mif` em síntese:** pesos, bias e beta são gravados nas BRAMs pelo Quartus durante a compilação. A imagem também parte de um `.mif`, mas pode ser sobrescrita em runtime via STORE.
-- **Inferência estritamente sequencial:** um neurônio de cada vez, uma classe de cada vez. Escolha feita para simplificar o controle e caber nos recursos da Cyclone V sem paralelismo explícito.
-- **BRAMs com latência de 1 ciclo:** a `altsyncram` apresenta o dado 1 ciclo após o endereço ser apresentado. Por isso existem os estados `PH_H_WAIT0/1` e `PH_O_WAIT0/1` na FSM — sem eles o MAC leria o dado do endereço anterior.
-- **Imagens obrigatoriamente em WIDTH=16 (Q4.12):** arquivos em WIDTH=8 (uint8 bruto, 0–255) nunca atingem o limiar 1536 e a rede recebe imagem completamente preta. O `create_img.py` foi corrigido para escalar com `round(pixel * 4096 / 255)`.
+- Representação exclusiva em ponto fixo Q4.12 (sem ponto flutuante)
+- Pesos residem em blocos BRAM/ROM inicializados via arquivos `.mif`
+- Arquitetura estritamente sequencial (sem paralelismo entre camadas)
+- Imagens de entrada obrigatoriamente em WIDTH=16 (Q4.12) — arquivos WIDTH=8 não são compatíveis com o hardware
+
+---
 
 ## 3. Arquitetura e Funcionamento
 
@@ -389,6 +401,16 @@ Total: **9 bits**, permitindo 8 opcodes possíveis. 6 estão definidos; `110` e 
 
 > Apertar apenas `KEY[3]` **não** grava. Apertar `KEY[1]` sem preparação também **não** grava.
 
+### 6.5 Por que escolhemos o Avalon-MM
+
+A interface Avalon-MM é o protocolo padrão do ecossistema Intel/Quartus para comunicação entre componentes em sistemas FPGA. Escolhemos ela por três razões práticas:
+
+**Integração futura com o HPS:** a DE1-SoC tem um processador ARM (HPS) que se comunica com a FPGA via barramento Avalon. Ao implementar a interface desde agora, o acelerador já nasce preparado para ser controlado por software nos próximos marcos — sem precisar refazer a lógica de controle.
+
+**Simplicidade do protocolo:** Avalon-MM é mapeado em memória — o mestre escreve em um endereço e o escravo responde. Não há handshake complexo. No nosso caso `avs_waitrequest` é sempre `0`, o que significa que toda transação completa em 1 ciclo. É direto ao ponto.
+
+**Reutilização no inicializador:** o módulo `inicializador.v` atua como mestre Avalon e envia as instruções automaticamente ao sair do reset. Sem a interface padronizada, teríamos que criar um protocolo proprietário entre os dois módulos — e o Avalon já resolve isso com 6 fios.
+
 ---
 
 ## 7. Ambiente e Ferramentas
@@ -572,7 +594,7 @@ A verificação foi realizada em dois níveis: simulação funcional no ModelSim
 vsim -c tb_elm_accel_completo -do "run -all"
 ```
 
-### 10.4 Problema com init_file no ModelSim
+### 10.5 Problema com init_file no ModelSim
 
 O ModelSim não recarrega o `init_file` da altsyncram de forma confiável ao trocar o `.mif`. Para contornar isso, use `mem_imagem_sim.v` no lugar de `mem_imagem.v` **apenas na simulação**:
 
@@ -624,7 +646,34 @@ SW[2:0]=000 + KEY[1]  →  CLEAR_ERR  →  display volta para IDLE
 
 ## 12. Resultados
 
-### 12.1 Latência
+### 12.1 Uso de recursos na FPGA
+
+Dados obtidos após síntese e fitting no Quartus Prime 25.1 para **Cyclone V — 5CSEMA5F31C6**:
+
+| Recurso | Usado | Disponível | % |
+|---------|-------|------------|---|
+| ALMs (lógica combinacional) | 1.921 | 32.070 | 6% |
+| ALUTs combinacionais | 2.373 | — | — |
+| Registradores (flip-flops) | 2.438 | 128.280 | ~2% |
+| Blocos M10K (BRAM) | 203 | 397 | 51% |
+| Bits de memória total | 1.640.704 | 4.065.280 | 40% |
+| Blocos DSP (18×18) | 4 | 87 | 5% |
+| Pinos | 53 | 457 | 12% |
+
+O consumo de ALMs é baixo (6%) — a maior parte da área vai para as memórias. Os 4 blocos DSP correspondem às duas unidades MAC instanciadas (cada multiplicador 16×16 signed usa 2 blocos DSP). Os 51% de M10K vêm quase inteiramente da `mem_pesos` (100.352 palavras × 16 bits = ~1,6 Mbits).
+
+Distribuição dos ALUTs por módulo (dados do relatório de mapeamento):
+
+| Módulo | ALUTs combinacionais | Flip-flops |
+|--------|---------------------|------------|
+| `elm_accel` (FSM + datapath) | 976 | 2.056 |
+| `argmax` | 807 | 0 |
+| `ativacao` | 41 | 0 |
+| `inicializador` + `coprocessador` | ~549 | ~382 |
+
+O `argmax` consome 807 ALUTs porque compara 10 valores de 32 bits em lógica puramente combinacional — é o módulo mais custoso em área combinacional depois da FSM principal.
+
+### 12.2 Latência de inferência
 
 | Etapa | Ciclos |
 |-------|--------|
@@ -635,7 +684,9 @@ SW[2:0]=000 + KEY[1]  →  CLEAR_ERR  →  display volta para IDLE
 | **Total** | **~101.770 ciclos** |
 | **Latência @ 50 MHz** | **~2,03 ms por inferência** |
 
-### 12.2 Dificuldades encontradas
+O bottleneck é a camada oculta: 784 pixels × 128 neurônios = 100.352 iterações do loop MAC, cada uma levando 4 ciclos (ADDR + WAIT0 + WAIT1 + MAC). A arquitetura é sequencial por escolha — paralelizar reduziria a latência mas aumentaria muito o uso de DSPs e ALMs.
+
+### 12.3 Dificuldades encontradas
 
 **Latência da BRAM**
 
@@ -649,7 +700,7 @@ O script original do professor gerava WIDTH=8 (uint8 bruto). O limiar de binariz
 
 O ModelSim às vezes ignora completamente o `init_file` da altsyncram. Solução: módulo substituto `mem_imagem_sim.v` que usa `$readmemh` para carregar um arquivo `.hex`, contornando a limitação.
 
-### 12.3 Observações
+### 12.4 Observações
 
 A sigmoid piecewise linear com 4 segmentos mantém erro < 2% em relação à sigmoid exata, suficiente para a classificação de dígitos. Os testes na placa confirmaram que o comportamento observado em simulação foi preservado no hardware real.
 
