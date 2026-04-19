@@ -136,21 +136,13 @@ O sistema retorna um valor no intervalo **0..9** indicando o dígito identificad
 
 ### 3.1 Diagrama de blocos
 
-![Diagrama interno do elm_accel](docs/diagrama_drawio.png)
-
-**Diagrama interno — elm_accel:**
-
-![Diagrama interno do elm_accel](docs/diagrama_drawio.png)
-
-**Fluxo de entradas e saídas:**
-
-![Fluxo de entradas e saídas](docs/diagrama_de_fluxo_drawio.png)
+![Diagrama interno do elm_accel](docs/diagrama.drawio.png)
 
 ---
 
 ### 3.2 Fluxo da inferência
 
-![Fluxo de entradas e saídas](docs/diagrama_de_fluxo_drawio.png)
+![Fluxo de entradas e saídas](docs/diagrama%20de%20fluxo.drawio.png)
 
 O fluxo completo em alto nível:
 
@@ -587,7 +579,7 @@ A verificação foi realizada em dois níveis: simulação funcional no ModelSim
 
 ### 10.3 Formas de onda
 
-![Simulação ModelSim](docs/simulacao_modelsim.png)
+![Simulação ModelSim](docs/Memoria_tb.jpg)
 
 ### 10.4 Executar
 
