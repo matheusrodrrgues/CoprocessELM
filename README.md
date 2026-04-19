@@ -3,6 +3,16 @@
 > **Marco 1 — Coprocessador ELM em FPGA + Simulação**
 > Universidade Estadual de Feira de Santana · Departamento de Tecnologia
 
+<div align="center">
+
+[![Simulation](https://img.shields.io/badge/simulação-ModelSim-blue)](#10-simulação-e-testes)
+[![Target](https://img.shields.io/badge/alvo-DE1--SoC%20(Cyclone%20V)-orange)](#7-ambiente-de-desenvolvimento)
+[![Format](https://img.shields.io/badge/ponto%20fixo-Q4.12-green)](#4-formato-numérico-q412)
+[![License](https://img.shields.io/badge/disciplina-TEC%20499-purple)](#)
+[![UEFS](https://img.shields.io/badge/UEFS-DEXA-red)](#)
+
+</div>
+
 ---
 
 ## 📋 Sumário
@@ -86,41 +96,37 @@ O sistema retorna um valor no intervalo **0..9** indicando o dígito identificad
 
 ## 2. Requisitos
 
-### 2.1 Funcionais
+### 2.1 O que o sistema implementa
 
-| ID | Requisito |
-|----|-----------|
-| RF-01 | Aceitar imagem 28×28 pixels em formato Q4.12 (WIDTH=16) |
-| RF-02 | Implementar camada oculta: `h = sigmoid(W · x + b)` com 128 neurônios |
-| RF-03 | Implementar camada de saída: `y = β · h` com 10 classes |
-| RF-04 | Retornar predição `pred = argmax(y)` no intervalo [0, 9] |
-| RF-05 | Todos os valores internos em ponto fixo Q4.12 |
-| RF-06 | Arquitetura sequencial com FSM de controle |
-| RF-07 | Datapath com unidade MAC (Multiply-Accumulate) |
-| RF-08 | Função de ativação sigmoid aproximada por interpolação linear |
-| RF-09 | Memórias para imagem, pesos W, bias b e pesos β |
-| RF-10 | ISA com instruções: STORE_IMG, STORE_W, STORE_B, START, STATUS, CLEAR_ERR |
-| RF-11 | Interface Avalon-MM para integração futura com processador |
-| RF-12 | Inicialização automática via módulo `inicializador.v` ao sair do reset |
+Cada requisito abaixo corresponde diretamente a algo que existe no código — não são itens genéricos, são funcionalidades verificáveis:
 
-### 2.2 Não-funcionais
+| ID | O que foi implementado | Onde no código |
+|----|------------------------|----------------|
+| RF-01 | Recebe imagem 28×28 em Q4.12 e binariza com limiar `IMG_BIN_TH = 1536` | `elm_accel.v` → `dado_img_bin` |
+| RF-02 | Calcula `h = sigmoid(W·x + b)` para 128 neurônios com acumulador 32 bits | `elm_accel.v` → fases `PH_H_*` |
+| RF-03 | Calcula `y = β·h` para 10 classes de saída | `elm_accel.v` → fases `PH_O_*` |
+| RF-04 | Retorna `pred = argmax(y[0..9])` no intervalo 0–9 | `argmax.v` → `classe_escolhida` |
+| RF-05 | Toda a aritmética interna em Q4.12 — multiplicação gera Q8.24, reescalada por shift de 12 bits | `mac_calculo.v` → `>>> Q_FRAC` |
+| RF-06 | FSM com 4 estados (IDLE/BUSY/DONE/ERROR) e 15 fases internas no BUSY | `elm_accel.v` → `estado_atual`, `fase_atual` |
+| RF-07 | Duas unidades MAC instanciadas: `u_mac_hidden` para camada oculta, `u_mac_output` para saída | `elm_accel.v` |
+| RF-08 | Sigmoid aproximada por 4 segmentos lineares entre x=−4 e x=+4, erro < 2% | `ativacao.v` |
+| RF-09 | 4 memórias separadas: imagem (784×16b), pesos (100352×16b), bias (128×16b), beta (1280×16b) | `bancodememorias.v` |
+| RF-10 | 6 instruções via switches de 3 bits: `CLEAR_ERR`, `STORE_IMG`, `STORE_W`, `STORE_B`, `START`, `STATUS` | `elm_accel.v` → `CMD_*` |
+| RF-11 | Interface Avalon-MM com 3 endereços de escrita e 3 de leitura (status, predição, ciclos) | `elm_accel.v` → `avs_*` |
+| RF-12 | Flags `imagem_ok`, `pesos_ok`, `bias_ok` bloqueiam o START enquanto alguma estiver inativa | `elm_accel.v` → `ledr_flags` |
+| RF-13 | Contador de ciclos de execução gravado em `ciclos_total` ao finalizar | `elm_accel.v` → `ciclos_execucao` |
+| RF-14 | Saturação 32→16 bits antes da ativação para evitar overflow no acumulador | `elm_accel.v` → `sat32_to_q16` |
+| RF-15 | Inicialização automática das instruções ao sair do reset, sem interação manual | `inicializador.v` |
 
-| ID | Requisito |
-|----|-----------|
-| RNF-01 | Sintetizável para DE1-SoC (Cyclone V — 5CSEMA5F31C6) |
-| RNF-02 | Clock alvo: 50 MHz |
-| RNF-03 | Testbench com 11 cenários cobrindo todos os estados da FSM |
-| RNF-04 | Código Verilog comentado e documentado por módulo |
-| RNF-05 | Script Python para conversão de imagens PNG → MIF em Q4.12 |
+### 2.2 Decisões técnicas que condicionaram o projeto
 
-### 2.3 Restrições de projeto
+Essas não são restrições impostas de fora — são escolhas que tomamos e que moldaram como tudo foi feito:
 
-- Representação exclusiva em ponto fixo Q4.12 (sem ponto flutuante)
-- Pesos residem em blocos BRAM/ROM inicializados via arquivos `.mif`
-- Arquitetura estritamente sequencial (sem paralelismo entre camadas)
-- Imagens de entrada obrigatoriamente em WIDTH=16 (Q4.12) — arquivos WIDTH=8 não são compatíveis com o hardware
-
----
+- **Ponto fixo Q4.12 em tudo:** sem ponto flutuante em nenhuma operação. Elimina divisores e multiplicadores de ponto flutuante do hardware, reduz área e melhora a frequência máxima. Os pesos já vêm treinados nesse formato, então a conversão é direta.
+- **Memórias inicializadas por `.mif` em síntese:** pesos, bias e beta são gravados nas BRAMs pelo Quartus durante a compilação. A imagem também parte de um `.mif`, mas pode ser sobrescrita em runtime via STORE.
+- **Inferência estritamente sequencial:** um neurônio de cada vez, uma classe de cada vez. Escolha feita para simplificar o controle e caber nos recursos da Cyclone V sem paralelismo explícito.
+- **BRAMs com latência de 1 ciclo:** a `altsyncram` apresenta o dado 1 ciclo após o endereço ser apresentado. Por isso existem os estados `PH_H_WAIT0/1` e `PH_O_WAIT0/1` na FSM — sem eles o MAC leria o dado do endereço anterior.
+- **Imagens obrigatoriamente em WIDTH=16 (Q4.12):** arquivos em WIDTH=8 (uint8 bruto, 0–255) nunca atingem o limiar 1536 e a rede recebe imagem completamente preta. O `create_img.py` foi corrigido para escalar com `round(pixel * 4096 / 255)`.
 
 ## 3. Arquitetura e Funcionamento
 
@@ -723,7 +729,6 @@ PBLFinal/
 4. **Intel Quartus Prime Lite Design Software** — versão 25.1.
 5. **ChatGPT** — OpenAI. Assistente de linguagem utilizado como apoio no desenvolvimento e documentação do projeto. Disponível em: [openai.com/chatgpt](https://openai.com/chatgpt)
 6. **Claude** — Anthropic. Assistente de linguagem utilizado como apoio no desenvolvimento e documentação do projeto. Disponível em: [claude.ai](https://claude.ai)
-
 
 ---
 
