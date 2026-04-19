@@ -3,16 +3,6 @@
 > **Marco 1 — Coprocessador ELM em FPGA + Simulação**
 > Universidade Estadual de Feira de Santana · Departamento de Tecnologia
 
-<div align="center">
-
-[![Simulation](https://img.shields.io/badge/simulação-ModelSim-blue)](#10-simulação-e-testes)
-[![Target](https://img.shields.io/badge/alvo-DE1--SoC%20(Cyclone%20V)-orange)](#7-ambiente-de-desenvolvimento)
-[![Format](https://img.shields.io/badge/ponto%20fixo-Q4.12-green)](#4-formato-numérico-q412)
-[![License](https://img.shields.io/badge/disciplina-TEC%20499-purple)](#)
-[![UEFS](https://img.shields.io/badge/UEFS-DEXA-red)](#)
-
-</div>
-
 ---
 
 ## 📋 Sumário
@@ -30,8 +20,7 @@
 11. [Usando na Placa](#11-usando-na-placa)
 12. [Resultados](#12-resultados)
 13. [Organização do Repositório](#13-organização-do-repositório)
-14. [Equipe](#14-equipe)
-15. [Referências](#15-referências)
+14. [Referências](#14-referências)
 
 ---
 
@@ -713,15 +702,7 @@ PBLFinal/
 
 ---
 
-## 14. Equipe de Desenvolvedores
-
-> _Matheus Silva Rodrigues,_
-> _Adna Amorim da Silva Conceição,_
-> _Allen Gomes de Oliveira Junior._
-
----
-
-## 15. Referências
+## 14. Referências
 
 1. **DE1-SoC User Manual** — Terasic Technologies. Disponível em: [fpgacademy.org](https://fpgacademy.org/boards.html)
 2. **Accelerating Extreme Learning Machine on FPGA** — UTHM Publisher. Disponível em: [publisher.uthm.edu.my](https://publisher.uthm.edu.my/ojs/index.php/ijie/article/view/4431)
