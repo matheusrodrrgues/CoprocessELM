@@ -709,9 +709,9 @@ PBLFinal/
 
 ## 14. Equipe de Desenvolvedores
 
-> _Matheus Silva Rodrigues_
-> _Adna Amorim da Silva Conceição_
-> _Allen Gomes de Oliveira Junior_
+> _Matheus Silva Rodrigues,_
+> _Adna Amorim da Silva Conceição,_
+> _Allen Gomes de Oliveira Junior._
 
 ---
 
